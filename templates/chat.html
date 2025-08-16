@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBot - Medical Chatbot</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>MediBot</h2>
+            <p>Your AI-powered medical assistant</p>
+        </div>
+        <div class="chat-body" id="chat-body">
+            <div class="message bot-message">
+                <p>Hello! I'm MediBot. Ask about medical conditions (e.g., "What is acne?, give in 10 characters").</p>
+            </div>
+        </div>
+        <div class="chat-footer">
+            <form id="chat-form" method="POST" action="/get">
+                <textarea id="user-input" name="user-input" placeholder="Type your question..." rows="2"></textarea>
+                <button type="submit" id="send-button">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const chatBody = document.getElementById('chat-body');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = userInput.value.trim();
+            if (!query) return;
+
+            // Display user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user-message';
+            userMessage.innerHTML = `<p>${query}</p>`;
+            chatBody.appendChild(userMessage);
+            userInput.value = '';
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            // Send query to backend
+            try {
+                const response = await fetch('/get', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `user-input=${encodeURIComponent(query)}`
+                });
+                const data = await response.json();
+
+                // Display bot response
+                const botMessage = document.createElement('div');
+                botMessage.className = 'message bot-message';
+                botMessage.innerHTML = `<p>${data.answer || 'I don\'t know'}</p>`;
+                chatBody.appendChild(botMessage);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            } catch (error) {
+                const botMessage = document.createElement('div');
+                botMessage.className = 'message bot-message';
+                botMessage.innerHTML = `<p>Error: ${error.message}</p>`;
+                chatBody.appendChild(botMessage);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+        });
+
+        // Allow pressing Enter to send (without Shift)
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                form.dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>
