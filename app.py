@@ -16,7 +16,7 @@ app=Flask(__name__)
 load_dotenv()
 
 os.environ["PINECONE_API_KEY"]= "pcsk_3vQhR1_2nE1eSdCSbcX1bBvk2ffnzuqiSDjwst14U2s5AhFp6Vx3jbQSuMMN52wBv5H4LF"
-#os.environ["OPENAI_API_KEY"]="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"
+
 
 embeddings=download_hugging_face_embeddings()
 
